@@ -1,15 +1,15 @@
-import eslint from "@eslint/js";
-import eslintConfigPrettier from "eslint-config-prettier";
-import globals from "globals";
-import tseslint from "typescript-eslint";
+import eslint from '@eslint/js';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ["build/**", "node_modules/**"],
+    ignores: ['build/**', 'node_modules/**'],
   },
   eslint.configs.recommended,
   {
-    files: ["**/*.{ts,mts,cts}"],
+    files: ['**/*.{ts,mts,cts}'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       globals: {
@@ -17,17 +17,17 @@ export default tseslint.config(
       },
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
+      '@typescript-eslint/no-unused-vars': [
+        'error',
         {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
         },
       ],
     },
   },
   {
-    files: ["test/**/*.ts"],
+    files: ['test/**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.mocha,
@@ -35,10 +35,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.cjs"],
+    files: ['**/*.cjs'],
     languageOptions: {
       globals: globals.node,
-      sourceType: "commonjs",
+      sourceType: 'commonjs',
     },
   },
   eslintConfigPrettier,
