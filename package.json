@@ -17,7 +17,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "author": "LinericTW",
   "license": "UNLICENSED",
@@ -35,8 +36,10 @@
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.6.0",
+    "husky": "^9.1.7",
     "mocha": "^11.7.5",
     "prettier": "^3.8.3",
+    "pretty-quick": "^4.2.2",
     "rimraf": "^5.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.0.4",
