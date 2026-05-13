@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@colyseus/react": "^0.1.15",
+    "@colyseus/sdk": "^0.17.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
