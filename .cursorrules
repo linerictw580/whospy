@@ -1,0 +1,98 @@
+# WhoSpy（誰是臥底連線版）— Cursor AI 專案規範（.cursorrules）
+
+本規範用於約束 AI 在 `whospy` monorepo 內的改動方式，確保符合專案既有架構（參考 `docs/ARCHITECTURE.md`）與遊戲商務規則。
+
+---
+
+## 1) 技術棧（依 repo 現況）
+
+### Repository / Tooling
+- **Node.js**: `>= 20.9.0`（見根目錄 `package.json`）
+- **Monorepo**: npm workspaces（`workspaces: ["packages/*"]`）
+- **語言**: TypeScript（根目錄 `typescript ^5.0.4`；client 端 `typescript ~5.6.2`）
+- **Lint/Format**: ESLint `^9.39.4` + Prettier `^3.8.3`
+- **並行開發**: `concurrently ^9.1.2`
+- **Git hooks**: Husky `^9.1.7`
+
+### Frontend（`packages/client`）
+- **React**: `^19.0.0`
+- **Vite**: `^6.0.5`（plugin-react `^4.3.4`）
+- **Colyseus Client SDK**: `@colyseus/sdk ^0.17.17`
+
+### Backend（`packages/server`）
+- **Runtime**: Node.js + ESM（`type: "module"`）
+- **Colyseus**: `^0.17.6`
+- **Colyseus Tools**: `@colyseus/tools ^0.17.0`
+- **Schema**: `@colyseus/schema ^4.0.0`
+- **HTTP**: Express `^4.18.2`
+- **Dev runner**: `tsx ^4.21.0`
+- **Test**: Mocha `^11.7.5`（`@colyseus/testing ^0.17.10`）
+- **Loadtest**: `@colyseus/loadtest ^0.17.7`
+
+---
+
+## 2) 統一編碼風格（命名規範 / 組件架構）
+
+### 通用（前後端一致）
+- **檔名**
+  - React 元件：`PascalCase.tsx`（例：`PlayerList.tsx`）
+  - 其他 TS：`kebab-case.ts` 或 `camelCase.ts` 皆可，但同資料夾內要一致；若不確定，優先用 `kebab-case.ts`
+  - 測試：`*.test.ts`
+- **匯出風格**：優先使用 **named export**；只有「整個模組唯一主體」才使用 default export。
+- **型別命名**：`PascalCase`（`RoomState`, `Player`, `HintObject`）
+- **常數/列舉**：`SCREAMING_SNAKE_CASE`（例如 phase 值）
+- **事件/訊息**（若有 message type）：以 `camelCase` 表達動作（例：`commitHints`, `submitVote`），避免含糊縮寫。
+
+### Frontend（React + Vite）
+- **UI 必須狀態驅動**：嚴格以 `room.state.phase`（由 Colyseus 同步）切換畫面/元件，不要在前端自行推導 phase。
+- **元件分層（建議）**
+  - `src/App.tsx`: 只做頂層路由/房間連線/phase 分流，不堆放複雜 UI 邏輯
+  - `src/components/*`: 純展示或可重用元件（不耦合遊戲規則）
+  - `src/features/*`: 與遊戲流程強耦合的畫面（例如 `waiting`, `show-word`, `input-hint`, `voting`, `result`）
+- **hooks**：以 `useXxx` 命名，避免在 hook 內隱藏跨 phase 的副作用；對於 WebSocket/Room 綁定要有明確 cleanup。
+
+### Backend（Colyseus）
+- **Room 邏輯集中**：遊戲狀態轉移（phase 轉換、計時器、淘汰、投票結算）一律在 server 端處理。
+- **Schema 優先**：新增狀態/資料結構優先擴充 `packages/server/src/schema/State.ts`（依 `ARCHITECTURE.md` 指示）。
+- **權限與機密**：身分（誰是臥底/詞彙）不得以可推回的形式同步到未授權的 client；前端只能收到「被授權看到」資訊。
+
+---
+
+## 3) 專案背景（目錄結構 / 核心邏輯 / 商務限制）
+
+### 目錄結構（重點）
+- **`packages/server`**：Colyseus 房間、Schema（狀態同步來源）、計時器、投票統計、權限與機密資料
+- **`packages/client`**：React UI，負責「一機多人循環介面」、遮罩防偷看、提示列表、投票操作
+- **`docs/ARCHITECTURE.md`**：唯一權威的架構與商務規則說明（改流程/狀態機前必讀）
+
+### 核心狀態機（不得擅自更名/改意義）
+`phase` 僅能在既有語意下擴充與轉移：
+- `WAITING` | `SHOW_WORD` | `INPUT_HINT` | `VOTING` | `RESULT`
+
+### 一機多人（Multi-user）商務限制（必須遵守）
+- **Client（物理裝置）與 Player（實際玩家）分離**：一個連線裝置可對應多個 Player。
+- **循環 UI（Sequential UI）**：在 `SHOW_WORD` 與 `INPUT_HINT` 階段，前端要依該裝置關聯的玩家清單「逐一顯示/輸入」，直到該裝置全部完成才送出一次 `commit`。
+- **投票統計檢核**：server 端必須檢核該裝置送出的投票數量與登記人數一致，否則視為無效或要求補齊（依既有實作策略）。
+- **計時器以 server 為主**：時間到由 server 強制切 phase；前端僅顯示倒數與被動跟隨。
+
+---
+
+## 4) 行為約束（AI 禁止/限制操作）
+
+### 禁止危險或破壞性操作
+- **不得**執行會覆寫歷史的 git 操作（例如 `push --force`、`reset --hard`、`rebase -i`），除非使用者明確要求。
+- **不得**在不確認意圖下刪除大量檔案或目錄（包含清空 `packages/*`、移除 schema/rooms 等）。
+- **不得**繞過 hooks / 檢查（例如 `--no-verify`）除非使用者明確要求。
+
+### 禁止提交或修改不該進 repo 的內容
+- **不得**將 `node_modules/` 內容加入版本控制；若看到大量 `packages/client/node_modules/*` 變更，視為環境產物，避免納入改動。
+- **避免**不必要地大幅改寫 `package-lock.json`；只有在使用者要求升級/新增依賴、或修正依賴錯誤時才修改，並將變更範圍最小化。
+
+### 變更策略（品質與一致性）
+- **優先最小改動**：只改必要檔案，避免跨層（client/server/schema）同時大改。
+- **遵循文件**：涉及 phase、schema、multi-user 規則的改動，必須以 `docs/ARCHITECTURE.md` 為準；若衝突，以文件與既有行為為先。
+- **不得**把「身分/題目/詞彙」判斷移到前端或任何可被未授權 client 推導的位置。
+
+### 執行指令限制（在未被要求時）
+- 未被要求時，**不要**啟動長時間常駐程序（dev server/watchers）或進行大量安裝（`npm i`）；
+- 未被要求時，**不要**新增大型新依賴或改動整體工具鏈（ESLint/Prettier/TSConfig 結構性重整）。
