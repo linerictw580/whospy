@@ -3,7 +3,29 @@
   "name": "@whospy/shared",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf build",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "prepare": "npm run build"
+  },
   "exports": {
-    ".": "./constants.ts"
+    ".": {
+      "types": "./build/constants.d.ts",
+      "import": "./build/constants.js",
+      "default": "./build/constants.js"
+    },
+    "./schema/MyRoomState": {
+      "types": "./build/schema/MyRoomState.d.ts",
+      "import": "./build/schema/MyRoomState.js",
+      "default": "./build/schema/MyRoomState.js"
+    }
+  },
+  "dependencies": {
+    "@colyseus/schema": "^4.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.0",
+    "typescript": "~5.6.2"
   }
 }

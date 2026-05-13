@@ -1,5 +1,1 @@
-import { Schema, type } from '@colyseus/schema';
-
-export class MyRoomState extends Schema {
-  @type('string') mySynchronizedProperty: string = 'Hello world';
-}
+export { MyRoomState, Player } from '@whospy/shared/schema/MyRoomState';

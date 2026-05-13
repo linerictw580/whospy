@@ -11,6 +11,7 @@
   "dependencies": {
     "@colyseus/react": "^0.1.15",
     "@colyseus/sdk": "^0.17.42",
+    "@whospy/shared": "*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

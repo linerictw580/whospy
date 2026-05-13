@@ -1,5 +1,6 @@
-import { useRoom } from '@colyseus/react';
+import { useRoom, useRoomState } from '@colyseus/react';
 import { Client } from '@colyseus/sdk';
+import { MyRoomState } from '@whospy/shared/schema/MyRoomState';
 
 const client = new Client('http://localhost:2567');
 
@@ -13,7 +14,10 @@ export default function App() {
 }
 
 function Game() {
-  const { room, isConnecting } = useRoom(() => client.joinOrCreate('my_room'));
+  const { room, isConnecting } = useRoom<MyRoomState>(() =>
+    client.joinOrCreate('my_room', {}, MyRoomState),
+  );
+  const state = useRoomState<MyRoomState>(room);
 
   if (isConnecting) {
     return <p>連線中...</p>;
@@ -23,5 +27,22 @@ function Game() {
     return <p>尚未連到房間</p>;
   }
 
-  return <p>已連線房間：{room.name}</p>;
+  if (!state) {
+    return <p>尚未收到房間狀態</p>;
+  }
+
+  console.log(state.players);
+
+  return (
+    <>
+      <p>已連線房間：{room.name}</p>
+      <ul>
+        {Object.entries(state.players).map(([sessionId, player]) => (
+          <li key={sessionId}>
+            {player.name || '(未命名玩家)'} ({sessionId})
+          </li>
+        ))}
+      </ul>
+    </>
+  );
 }

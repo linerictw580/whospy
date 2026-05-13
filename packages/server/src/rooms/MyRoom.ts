@@ -1,5 +1,5 @@
 import { Room, Client, CloseCode } from 'colyseus';
-import { MyRoomState } from './schema/MyRoomState.js';
+import { MyRoomState, Player } from './schema/MyRoomState.js';
 
 export class MyRoom extends Room {
   maxClients = 4;
@@ -21,17 +21,13 @@ export class MyRoom extends Room {
   }
 
   onJoin(client: Client, _options: unknown) {
-    /**
-     * Called when a client joins the room.
-     */
     console.log(client.sessionId, 'joined!');
+    this.state.players.set(client.sessionId, new Player());
   }
 
   onLeave(client: Client, code: CloseCode) {
-    /**
-     * Called when a client leaves the room.
-     */
     console.log(client.sessionId, 'left!', code);
+    this.state.players.delete(client.sessionId);
   }
 
   onDispose() {

@@ -12,9 +12,9 @@
   },
   "scripts": {
     "dev": "npm run dev:all",
-    "dev:all": "concurrently -n server,client -c blue,green \"npm run dev -w @whospy/server\" \"npm run dev -w @whospy/client\"",
-    "dev:server": "npm run dev -w @whospy/server",
-    "dev:client": "npm run dev -w @whospy/client",
+    "dev:all": "npm run build -w @whospy/shared && concurrently -n shared,server,client -c yellow,blue,green \"npm run dev -w @whospy/shared\" \"npm run dev -w @whospy/server\" \"npm run dev -w @whospy/client\"",
+    "dev:server": "npm run build -w @whospy/shared && concurrently -n shared,server -c yellow,blue \"npm run dev -w @whospy/shared\" \"npm run dev -w @whospy/server\"",
+    "dev:client": "npm run build -w @whospy/shared && concurrently -n shared,client -c yellow,green \"npm run dev -w @whospy/shared\" \"npm run dev -w @whospy/client\"",
     "start": "npm run start -w @whospy/server",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test -w @whospy/server",
