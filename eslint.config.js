@@ -5,11 +5,17 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['build/**', 'node_modules/**'],
+    ignores: [
+      '**/node_modules/**',
+      '**/build/**',
+      '**/dist/**',
+      'packages/client/.vite/**',
+    ],
   },
   eslint.configs.recommended,
   {
-    files: ['**/*.{ts,mts,cts}'],
+    files: ['**/*.{ts,mts,cts,tsx}'],
+    ignores: ['packages/client/**'],
     extends: [...tseslint.configs.recommended],
     languageOptions: {
       globals: {
@@ -27,7 +33,28 @@ export default tseslint.config(
     },
   },
   {
-    files: ['test/**/*.ts'],
+    files: ['packages/client/**/*.{ts,tsx}'],
+    extends: [...tseslint.configs.recommended],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
+  {
+    files: ['packages/server/test/**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.mocha,

@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "@whospy/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./constants.ts"
+  }
+}
