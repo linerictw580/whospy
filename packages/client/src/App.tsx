@@ -32,21 +32,21 @@ export default function App() {
 }
 
 function Lobby() {
-  const { setRoomAction: setIntent } = useRoomAction();
+  const { setAction } = useRoomAction();
   const location = useLocation();
 
   useEffect(() => {
     if (location.pathname !== '/') {
       return;
     }
-    setIntent(null);
-  }, [location.pathname, setIntent]);
+    setAction((prev) => (prev?.type === 'reconnect' ? prev : null));
+  }, [location.pathname, setAction]);
 
   return (
     <>
       <CreateRoomForm
         onSubmit={(roomTitle) =>
-          setIntent({ type: 'create', roomTitle, nonce: Date.now() })
+          setAction({ type: 'create', roomTitle, nonce: Date.now() })
         }
       />
     </>
@@ -56,7 +56,7 @@ function Lobby() {
 function RoomGate() {
   const { roomId } = useParams();
   const id = roomId ?? '';
-  const { action: intent, setRoomAction: setIntent } = useRoomAction();
+  const { action: intent, setAction: setIntent } = useRoomAction();
   const { room, isConnecting, error } = useRoom();
 
   useEffect(() => {
@@ -68,6 +68,12 @@ function RoomGate() {
     }
     if (intent?.type === 'join' && intent.roomId === id) {
       return;
+    }
+    if (intent?.type === 'reconnect') {
+      const tokenRoomId = intent.reconnectionToken.split(':')[0];
+      if (tokenRoomId === id) {
+        return;
+      }
     }
     if (intent?.type === 'create') {
       return;
@@ -107,7 +113,7 @@ function RoomGate() {
 
 function LobbyLink({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
-  const { setRoomAction: setIntent } = useRoomAction();
+  const { setAction: setIntent } = useRoomAction();
   return (
     <a
       href="/"

@@ -28,8 +28,28 @@ export class MyRoom extends Room {
     this.state.players.set(client.sessionId, player);
   }
 
-  onLeave(client: Client, code: CloseCode) {
+  onDrop(client: Client, code?: number) {
+    console.log(client.sessionId, 'dropped', code);
+    this.allowReconnection(client, 60);
+  }
+
+  onReconnect(client: Client) {
+    console.log(client.sessionId, 'reconnected');
+  }
+
+  async onLeave(client: Client, code: CloseCode) {
     console.log(client.sessionId, 'left!', code);
+    // if (code !== CloseCode.CONSENTED) {
+    //   try {
+    //     // Wait for reconnection
+    //     await this.allowReconnection(client, 30);
+    //     console.log('Client reconnected!');
+    //     return; // Don't clean up, client is back
+    //   } catch (e) {
+    //     // Reconnection failed or timed out
+    //   }
+    // }
+    // Clean up player
     this.state.players.delete(client.sessionId);
   }
 
