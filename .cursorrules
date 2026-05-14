@@ -29,6 +29,21 @@
 - **Test**: Mocha `^11.7.5`（`@colyseus/testing ^0.17.10`）
 - **Loadtest**: `@colyseus/loadtest ^0.17.7`
 
+### Colyseus 官方開發規範
+- **技術參考與文檔**：在處理前後端邏輯時，應優先遵循 Colyseus 官方文檔：https://docs.colyseus.io/。(目前使用 Colyseus 0.17 版本)
+- **狀態驅動開發 (State-driven)**：
+  - 嚴格遵守「伺服器為唯一事實來源 (Source of Truth)」原則。
+  - 所有遊戲數據（如玩家身分、提示清單、當前階段）必須定義在 `packages/shared/schema` 底下。
+  - 嚴禁在 Client 端自行計算遊戲勝負或分配身分，Client 僅負責發送指令 (Message) 與渲染 State。
+- **Schema 應用**：
+  - 使用 Colyseus 的 `@type` 裝飾器定義同步狀態。
+  - 針對「一機多人」需求，Player Schema 應設計為可容納多位子玩家的結構。
+- **房間生命週期**：
+  - 正確實作 `onCreate`, `onJoin`, `onLeave`, `onDispose` 等生命週期鉤子。
+  - 所有的定時任務（如投票倒數、顯示題目倒數）應使用 `this.clock` 或 `this.broadcast` 進行，避免使用原生 `setTimeout` 導致狀態失同步。
+- **型別安全**：
+  - 在 Monorepo 結構下，應確保前後端引用 shared 底下的 Schema 型別，維持全棧型別一致性。
+
 ---
 
 ## 2) 統一編碼風格（命名規範 / 組件架構）
