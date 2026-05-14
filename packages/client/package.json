@@ -13,7 +13,8 @@
     "@colyseus/sdk": "^0.17.42",
     "@whospy/shared": "*",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.15.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

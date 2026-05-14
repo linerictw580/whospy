@@ -14,15 +14,18 @@ export class MyRoom extends Room {
     },
   };
 
-  onCreate(_options: unknown) {
-    /**
-     * Called when a new room is created.
-     */
+  onCreate(options: { roomTitle?: unknown }) {
+    console.log(`Create room: ${this.roomId}`);
+    const raw = options?.roomTitle;
+    const title = typeof raw === 'string' ? raw.trim().slice(0, 64) : '';
+    this.state.roomTitle = title || '未命名房間';
   }
 
   onJoin(client: Client, _options: unknown) {
     console.log(client.sessionId, 'joined!');
-    this.state.players.set(client.sessionId, new Player());
+    const player = new Player();
+    player.isHost = this.state.players.size === 0;
+    this.state.players.set(client.sessionId, player);
   }
 
   onLeave(client: Client, code: CloseCode) {
@@ -34,6 +37,6 @@ export class MyRoom extends Room {
     /**
      * Called when the room is disposed.
      */
-    console.log('room', this.roomId, 'disposing...');
+    console.log(`Dispose room: ${this.roomId}`);
   }
 }
