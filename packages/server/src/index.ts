@@ -7,10 +7,15 @@
  *
  * See: https://docs.colyseus.io/server
  */
+import './load-env.js';
+
 import { listen } from '@colyseus/tools';
 
 // Import Colyseus config
 import app from './app.config.js';
 
-// Create and listen on 2567 (or PORT environment variable.)
-listen(app);
+/** Self-host default when `PORT` is unset. Colyseus Cloud still binds per platform rules. */
+const DEFAULT_PORT = 4527;
+const port = Number(process.env.PORT) || DEFAULT_PORT;
+
+listen(app, port);

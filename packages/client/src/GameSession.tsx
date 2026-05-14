@@ -13,7 +13,11 @@ import { Client } from '@colyseus/sdk';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { MyRoomState } from '@whospy/shared/schema/MyRoomState';
 
-export const client = new Client('http://localhost:2567');
+const DEFAULT_COLYSEUS_URL = 'http://localhost:4527';
+
+export const client = new Client(
+  import.meta.env.VITE_COLYSEUS_URL ?? DEFAULT_COLYSEUS_URL,
+);
 
 export const { RoomProvider, useRoom, useRoomState } =
   createRoomContext<MyRoomState>();
